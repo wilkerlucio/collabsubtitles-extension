@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "Collab Subtitles",
+  "description": "Collaborative subtitle injector for web videos.",
+  "version": "0.1",
+
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+
+      "css": ["collabsubtitles.css"],
+
+      "js": [
+        "jquery-1.9.1.js",
+        "public/main.js",
+        "init.js"
+      ],
+
+      "all_frames": true
+    }
+  ]
+}

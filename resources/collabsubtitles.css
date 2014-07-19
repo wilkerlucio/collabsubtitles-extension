@@ -1,0 +1,36 @@
+.collabsubtitles-wrapper {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: table;
+    z-index: 99999;
+    pointer-events: none;
+}
+
+.collabsubtitles-wrapper .collabsubtitles-cc {
+    margin: 0;
+    border: 0;
+    font: inherit;
+    text-shadow: 3px 3px 0 black, 3px -3px 0 black, -3px 3px 0 black, -3px -3px 0 black, 3px 0 0 black, -3px 0 0 black, 0 3px 0 black, 0 -3px 0 black;
+    display: table-cell;
+    color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    font-size: 26px;
+    text-align: center;
+    line-height: 40px;
+    padding: 0 20px 20px;
+    vertical-align: bottom;
+    pointer-events: none;
+}
+
+video.collabsubtitles::-webkit-media-text-track-past-nodes {
+    background: transparent;
+}
+
+video.collabsubtitles::cue {
+    text-shadow: 3px 3px 0 black, 3px -3px 0 black, -3px 3px 0 black, -3px -3px 0 black, 3px 0 0 black, -3px 0 0 black, 0 3px 0 black, 0 -3px 0 black;
+    color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+}
