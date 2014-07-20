@@ -58,22 +58,31 @@
       (.addCue track (create-cue cue)))
     (set! (.-mode track) "showing")))
 
+(defn parse-vtt [string]
+  (let [parser (js/WebVTTParser.)]
+    (->> (.parse parser string)
+         .-cues
+         (map (fn [cue] {:begin (.-startTime cue)
+                         :end (.-endTime cue)
+                         :text (.-text cue)})))))
+
+(def subtitle-url "http://www.amara.org/en/subtitles/5Mo4oAj1bxOb/pt-br/32/download/The%20Internets%20Own%20Boy%20The%20Story%20of%20Aaron%20Swartz.pt-br.vtt")
+
 (defn setup-youtube-player-integration [video]
-  (go
-    (let [$video ($ video)
-          $player-container ($/closest $video "#movie_player")
-          $settings-button ($/find $player-container ".ytp-button.ytp-settings-button")
-          $cs-button ($/insert-after ($create-youtube-button) $settings-button)]
-      ($/on $cs-button "click" #(add-subtitles video sample-subtitle)))))
+  (let [$video ($ video)
+        $player-container ($/closest $video "#movie_player")
+        $settings-button ($/find $player-container ".ytp-button.ytp-settings-button")
+        $cs-button ($/insert-after ($create-youtube-button) $settings-button)]
+    ($/on $cs-button "click" #(go (add-subtitles video (assoc sample-subtitle
+                                                         :cues
+                                                         (-> (load-external-url subtitle-url)
+                                                                                <!
+                                                                                parse-vtt)))))))
 
 (defn setup-player-integration [video]
   (setup-youtube-player-integration video))
 
-(def subtitle-url "http://www.amara.org/en/subtitles/5Mo4oAj1bxOb/pt-br/32/download/The%20Internets%20Own%20Boy%20The%20Story%20of%20Aaron%20Swartz.pt-br.vtt")
-
 (defn init []
-  (go
-    (log "async on init" (<! (load-external-url subtitle-url))))
   (let [videos (find-videos "body")]
     (log "found videos" videos)
     (doseq [video videos]

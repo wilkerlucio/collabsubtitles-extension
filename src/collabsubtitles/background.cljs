@@ -7,8 +7,6 @@
   (.apply (.-log js/console) js/console (clj->js params)))
 
 (defn ajax-request
-  ([uri method]
-   (ajax-request uri method {} nil))
   ([uri method opts]
    (ajax-request uri method opts nil))
   ([uri method opts js-ajax]
