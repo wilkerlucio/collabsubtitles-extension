@@ -1,6 +1,6 @@
-# chrome-again
+# CollabSubtitles Chrome
 
-A Clojure library designed to ... well, that part is up to you.
+CollabSubtitles Chrome extension.
 
 ## Usage
 
