@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close!]]
             [jayq.core :refer [$] :as $]
-            [collabsubtitles.srt-parser :as srt]))
+            [collabsubtitles.srt-parser :refer [parse-srt]]))
 
 (defn log [& params]
   (.apply (.-log js/console) js/console (clj->js params))
@@ -89,6 +89,22 @@
     (.readAsText reader file)
     c))
 
+(defmulti read-file-cues
+  (fn [file]
+    (let [[_ ext] (re-find #"(?i)\.([a-z]+)$" (.-name file))]
+      (keyword (.toLowerCase ext)))))
+
+(defmethod read-file-cues :default [file]
+  (log "can't parse file" file)
+  identity)
+
+(defmethod read-file-cues :srt [_] parse-srt)
+(defmethod read-file-cues :vtt [_] parse-vtt)
+
+(defn track-from-file [file]
+  (go
+    {:cues ((read-file-cues file) (<! (read-file-as-text file)))}))
+
 (defn setup-subtitle-drop [video]
   (let [$video ($ video)
         add-class (partial $/add-class $video "collabsubtitles-dragover")
@@ -100,8 +116,7 @@
                      (remove-class)
                      (doseq [file (jq-event-files e)]
                        (go
-                         (let [vtt-content (<! (read-file-as-text file))]
-                           (add-subtitles video {:cues (srt/parse-srt vtt-content)}))))
+                         (add-subtitles video (<! (track-from-file file)))))
                      false)))))
 
 (defn setup-player-integration [video]
