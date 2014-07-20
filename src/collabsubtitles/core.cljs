@@ -1,8 +1,7 @@
 (ns collabsubtitles.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close!]]
-            [jayq.core :refer [$] :as $]
-            collabsubtitles.repl))
+            [jayq.core :refer [$] :as $]))
 
 (defn log [& params]
   (.apply (.-log js/console) js/console (clj->js params)))
@@ -79,10 +78,37 @@
                                                                                 <!
                                                                                 parse-vtt)))))))
 
+(defn jq-event-files [e] (.makeArray js/jQuery (-> e .-originalEvent .-dataTransfer .-files)))
+
+(defn read-file-as-text [file]
+  (let [reader (js/FileReader.)
+        c (chan)]
+    (set! (.-onload reader) (fn [e] (put! c (-> reader .-result)) (close! c)))
+    (.readAsText reader file)
+    c))
+
+(defn setup-subtitle-drop [video]
+  (let [$video ($ video)
+        add-class (partial $/add-class $video "collabsubtitles-dragover")
+        remove-class (partial $/remove-class $video "collabsubtitles-dragover")]
+    (doto $video
+      ($/on "dragenter dragover" add-class)
+      ($/on "dragleave dragend" remove-class)
+      ($/on "drop" (fn [e]
+                     (remove-class)
+                     (doseq [file (jq-event-files e)]
+                       (go
+                         (let [vtt-content (<! (read-file-as-text file))]
+                           (add-subtitles video {:cues (parse-vtt vtt-content)})))))))))
+
 (defn setup-player-integration [video]
+  (setup-subtitle-drop video)
   (setup-youtube-player-integration video))
 
 (defn init []
+  (set! (.-ondragover js/window) #(.preventDefault %))
+  (set! (.-ondrop js/window) #(.preventDefault %))
+
   (let [videos (find-videos "body")]
     (log "found videos" videos)
     (doseq [video videos]

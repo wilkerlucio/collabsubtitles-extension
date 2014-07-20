@@ -35,6 +35,11 @@ video.collabsubtitles::cue {
     font-weight: bold;
 }
 
+video.collabsubtitles-dragover {
+    border: 5px solid #2e93e2;
+    box-sizing: border-box;
+}
+
 .ytp-button.ytp-button-collabsubtitles {
     color: #808080;
     float: right;
