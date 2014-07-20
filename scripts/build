@@ -1,0 +1,11 @@
+#!/bin/bash
+
+rm -rf releases/0.1.0 releases/0.1.0.zip
+mkdir -p releases/0.1.0
+cp resources/* releases/0.1.0
+rm resources/public/main.min.js
+lein cljsbuild once release
+mkdir releases/0.1.0/public
+cp resources/public/main.min.js releases/0.1.0/public/main.js
+cd releases/0.1.0
+zip -r ../collabsubtitles-chrome-0.1.0.zip *
