@@ -4,6 +4,8 @@
   "description": "Collaborative subtitle injector for web videos.",
   "version": "0.1",
 
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
   "content_scripts": [
     {
       "matches": [
@@ -21,5 +23,15 @@
 
       "all_frames": true
     }
-  ]
+  ],
+
+  "background": {
+    "scripts": [
+      "webvtt.js",
+      "jquery-1.9.1.js",
+      "public/main.js",
+      "background.js"
+    ],
+    "persistent": true
+  }
 }

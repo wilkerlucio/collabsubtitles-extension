@@ -34,3 +34,16 @@ video.collabsubtitles::cue {
     font-family: Helvetica, Arial, sans-serif;
     font-weight: bold;
 }
+
+.ytp-button.ytp-button-collabsubtitles {
+    color: #808080;
+    float: right;
+    width: 30px;
+    height: 27px;
+    padding-top: 7px;
+    text-align: center;
+}
+
+.ytp-button.ytp-button-collabsubtitles:hover {
+    color: #aaa;
+}
