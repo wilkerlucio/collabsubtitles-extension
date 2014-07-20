@@ -83,7 +83,7 @@
 (defn read-file-as-text [file]
   (let [reader (js/FileReader.)
         c (chan)]
-    (set! (.-onload reader) (fn [e] (put! c (-> reader .-result)) (close! c)))
+    (set! (.-onload reader) (fn [_] (put! c (-> reader .-result)) (close! c)))
     (.readAsText reader file)
     c))
 
@@ -92,26 +92,22 @@
         add-class (partial $/add-class $video "collabsubtitles-dragover")
         remove-class (partial $/remove-class $video "collabsubtitles-dragover")]
     (doto $video
-      ($/on "dragenter dragover" add-class)
+      ($/on "dragenter dragover" #(do (add-class) false))
       ($/on "dragleave dragend" remove-class)
       ($/on "drop" (fn [e]
                      (remove-class)
                      (doseq [file (jq-event-files e)]
                        (go
                          (let [vtt-content (<! (read-file-as-text file))]
-                           (add-subtitles video {:cues (parse-vtt vtt-content)})))))))))
+                           (add-subtitles video {:cues (parse-vtt vtt-content)}))))
+                     false)))))
 
 (defn setup-player-integration [video]
   (setup-subtitle-drop video)
   (setup-youtube-player-integration video))
 
 (defn init []
-  (set! (.-ondragover js/window) #(.preventDefault %))
-  (set! (.-ondrop js/window) #(.preventDefault %))
-
   (let [videos (find-videos "body")]
     (log "found videos" videos)
     (doseq [video videos]
       (setup-player-integration video))))
-
-(defn init-background [])
