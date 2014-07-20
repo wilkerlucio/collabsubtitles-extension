@@ -30,6 +30,10 @@
             (close! c))))
     c))
 
+(defn load-external-url [url]
+  (chrome-send-message {:action :load-url
+                        :url url}))
+
 (defn $create-youtube-button []
   (-> ($ "<div>")
       ($/add-class "ytp-button ytp-button-collabsubtitles")
@@ -65,9 +69,11 @@
 (defn setup-player-integration [video]
   (setup-youtube-player-integration video))
 
+(def subtitle-url "http://www.amara.org/en/subtitles/5Mo4oAj1bxOb/pt-br/32/download/The%20Internets%20Own%20Boy%20The%20Story%20of%20Aaron%20Swartz.pt-br.vtt")
+
 (defn init []
   (go
-    (log "async on init" (<! (chrome-send-message "testing"))))
+    (log "async on init" (<! (load-external-url subtitle-url))))
   (let [videos (find-videos "body")]
     (log "found videos" videos)
     (doseq [video videos]

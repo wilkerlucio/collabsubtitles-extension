@@ -16,6 +16,7 @@
       "css": ["collabsubtitles.css"],
 
       "js": [
+        "webvtt.js",
         "jquery-1.9.1.js",
         "public/main.js",
         "init.js"
@@ -27,7 +28,6 @@
 
   "background": {
     "scripts": [
-      "webvtt.js",
       "jquery-1.9.1.js",
       "public/main.js",
       "background.js"
