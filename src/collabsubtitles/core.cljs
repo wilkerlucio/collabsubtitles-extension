@@ -1,10 +1,12 @@
 (ns collabsubtitles.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close!]]
-            [jayq.core :refer [$] :as $]))
+            [jayq.core :refer [$] :as $]
+            [collabsubtitles.srt-parser :as srt]))
 
 (defn log [& params]
-  (.apply (.-log js/console) js/console (clj->js params)))
+  (.apply (.-log js/console) js/console (clj->js params))
+  (last params))
 
 (defn find-videos [root]
   (-> ($ root)
@@ -15,8 +17,8 @@
    :cues [{:begin 0 :end 2 :text "Sample Cue"}
           {:begin 2 :end 999999 :text "This should run for a while"}]})
 
-(defn create-cue [{:keys [begin end text]}]
-  (js/VTTCue. begin end text))
+(defn create-cue [{:keys [startTime endTime text]}]
+  (js/VTTCue. startTime endTime text))
 
 (defn chrome-send-message [message]
   (let [c (chan)]
@@ -61,8 +63,8 @@
   (let [parser (js/WebVTTParser.)]
     (->> (.parse parser string)
          .-cues
-         (map (fn [cue] {:begin (.-startTime cue)
-                         :end (.-endTime cue)
+         (map (fn [cue] {:startTime (.-startTime cue)
+                         :endTime (.-endTime cue)
                          :text (.-text cue)})))))
 
 (def subtitle-url "http://www.amara.org/en/subtitles/5Mo4oAj1bxOb/pt-br/32/download/The%20Internets%20Own%20Boy%20The%20Story%20of%20Aaron%20Swartz.pt-br.vtt")
@@ -99,7 +101,7 @@
                      (doseq [file (jq-event-files e)]
                        (go
                          (let [vtt-content (<! (read-file-as-text file))]
-                           (add-subtitles video {:cues (parse-vtt vtt-content)}))))
+                           (add-subtitles video {:cues (srt/parse-srt vtt-content)}))))
                      false)))))
 
 (defn setup-player-integration [video]
