@@ -31,7 +31,6 @@
       "jquery-1.9.1.js",
       "public/main.js",
       "background.js"
-    ],
-    "persistent": true
+    ]
   }
 }

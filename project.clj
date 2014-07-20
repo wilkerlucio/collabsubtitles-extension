@@ -21,4 +21,12 @@
         :compiler {
           :output-dir "resources/public/out"
           :output-to "resources/public/main.js"
-          :optimizations :whitespace}}}})
+          :optimizations :whitespace}}
+
+      :release {
+        :source-paths ["src"]
+        :compiler {
+          :output-to "resources/public/main.min.js"
+          :optimizations :advanced
+          :pretty-print false
+          :externs ["externs/jquery-1.9.js" "externs/webvtt.js"]}}}})

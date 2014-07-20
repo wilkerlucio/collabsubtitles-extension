@@ -1,7 +1,8 @@
 (ns collabsubtitles.background
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close! pipe]]
-            [ajax.core :as c]))
+            [ajax.core :as c]
+            [weasel.repl :as repl]))
 
 (defn log [& params]
   (.apply (.-log js/console) js/console (clj->js params)))
@@ -36,9 +37,9 @@
   (pipe (ajax-request url :get {:format (c/raw-response-format)})
         reply))
 
-(defn init []
+(defn ^:export init []
   (let [c (runtime-message-channel)]
     (go (while true
       (let [{:keys [request reply-chan]} (<! c)]
-        (reply-client request reply-chan))))))
-
+        (reply-client request reply-chan)))))
+  (repl/connect "ws://localhost:9001"))
