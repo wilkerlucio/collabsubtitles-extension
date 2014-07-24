@@ -1,4 +1,4 @@
-(ns collabsubtitles.background
+(ns collabsubtitles.background.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close! pipe]]
             [ajax.core :as c]
@@ -34,12 +34,12 @@
 (defmulti reply-client (fn [x _] (:action x)))
 
 (defmethod reply-client :load-url [{url :url} reply]
-  (pipe (ajax-request url :get {:format (c/raw-response-format)})
-        reply))
+                                  (pipe (ajax-request url :get {:format (c/raw-response-format)})
+                                        reply))
 
 (defn ^:export init []
   (let [c (runtime-message-channel)]
     (go (while true
-      (let [{:keys [request reply-chan]} (<! c)]
-        (reply-client request reply-chan)))))
+          (let [{:keys [request reply-chan]} (<! c)]
+            (reply-client request reply-chan)))))
   (repl/connect "ws://localhost:9001"))

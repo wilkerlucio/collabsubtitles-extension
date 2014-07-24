@@ -1,4 +1,4 @@
-(ns collabsubtitles.srt-parser
+(ns collabsubtitles.formats.srt
   (:require [clojure.string :as str]))
 
 (declare read-cue read-id read-time read-content parse-times convert-time
