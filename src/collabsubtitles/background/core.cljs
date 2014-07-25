@@ -2,10 +2,8 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.core.async :refer [chan <! >! timeout put! close! pipe]]
             [ajax.core :as c]
+            [collabsubtitles.util :refer [log]]
             [weasel.repl :as repl]))
-
-(defn log [& params]
-  (.apply (.-log js/console) js/console (clj->js params)))
 
 (defn ajax-request
   ([uri method opts]
