@@ -20,3 +20,11 @@
 (defn load-external-url [url]
   (chrome-send-message {:action :load-url
                         :url url}))
+
+(defn file->string
+  ([file] (file->string file (chan)))
+  ([file out]
+   (let [reader (js/FileReader.)]
+     (set! (.-onload reader) (fn [_] (put! out (-> reader .-result))))
+     (.readAsText reader file)
+     out)))

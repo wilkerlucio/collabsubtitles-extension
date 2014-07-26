@@ -12,7 +12,7 @@
 
 (defmethod cues-parser-for-file :default [file]
                                          (log "can't parse file" file)
-                                         (constantly nil))
+                                         nil)
 
 (defmethod cues-parser-for-file :srt [_] parse-srt)
 (defmethod cues-parser-for-file :vtt [_] parse-vtt)
@@ -24,6 +24,8 @@
     (.readAsText reader file)
     c))
 
-(defn track-from-file [file]
+(defn file->track [file]
   (go
-    {:cues ((cues-parser-for-file file) (<! (read-file-as-text file)))}))
+    (if-let [parser (cues-parser-for-file file)]
+      {:cues (parser (<! (read-file-as-text file)))}
+      :no-parser)))
