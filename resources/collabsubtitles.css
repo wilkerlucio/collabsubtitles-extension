@@ -52,3 +52,10 @@ video.collabsubtitles-dragover {
 .ytp-button.ytp-button-collabsubtitles:hover {
     color: #aaa;
 }
+
+.collabsubtitles-selector {
+    background: rgb(146, 146, 146);
+    float: right;
+    height: 20px;
+    margin-top: 3px;
+}

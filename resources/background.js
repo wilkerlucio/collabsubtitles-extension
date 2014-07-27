@@ -1,1 +1,1 @@
-collabsubtitles.background.init();
+collabsubtitles.background.core.init();

@@ -1,11 +1,7 @@
 (ns swannodette.utils.reactive
   (:refer-clojure :exclude [map mapcat filter remove distinct concat take-while])
-  (:require [goog.events :as events]
-            [goog.events.EventType]
-            [goog.events.FileDropHandler]
-            [goog.net.Jsonp]
+  (:require [goog.net.Jsonp]
             [goog.Uri]
-            [goog.dom :as gdom]
             collabsubtitles.util
             [cljs.core.async :refer [>! <! chan put! close! timeout alts!]])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
@@ -21,68 +17,6 @@
                    (collabsubtitles.util/log value))
         (>! out value))
       out)))
-
-(def keyword->event-type
-  {:keyup     js/goog.events.EventType.KEYUP
-   :keydown   js/goog.events.EventType.KEYDOWN
-   :keypress  js/goog.events.EventType.KEYPRESS
-   :click     js/goog.events.EventType.CLICK
-   :dblclick  js/goog.events.EventType.DBLCLICK
-   :mousedown js/goog.events.EventType.MOUSEDOWN
-   :mouseup   js/goog.events.EventType.MOUSEUP
-   :mouseover js/goog.events.EventType.MOUSEOVER
-   :mouseout  js/goog.events.EventType.MOUSEOUT
-   :mousemove js/goog.events.EventType.MOUSEMOVE
-   :focus     js/goog.events.EventType.FOCUS
-   :blur      js/goog.events.EventType.BLUR
-
-   :dragstart js/goog.events.EventType.DRAGSTART
-   :drag      js/goog.events.EventType.DRAG
-   :dragenter js/goog.events.EventType.DRAGENTER
-   :dragover  js/goog.events.EventType.DRAGOVER
-   :dragleave js/goog.events.EventType.DRAGLEAVE
-   :drop      js/goog.events.EventType.DROP
-   :dragend   js/goog.events.EventType.DRAGEND})
-
-(defn listen
-  ([el type] (listen el type nil))
-  ([el type f] (listen el type f (chan)))
-  ([el type f out]
-    (let [jtype (if (vector? type) (clj->js (cljs.core/map keyword->event-type type))
-                                   (keyword->event-type type))]
-      (events/listen el jtype
-        (fn [e] (when f (f e)) (put! out e))))
-    out))
-
-(defprotocol IEventWrapper
-  (-source-event [e]))
-
-(extend-protocol IEventWrapper
-  js/goog.events.BrowserEvent
-  (-source-event [e] (.getBrowserEvent e))
-
-  js/Event
-  (-source-event [e] e))
-
-(defn event->files [e]
-  (-> (-source-event e)
-      .-dataTransfer
-      .-files
-      prim-seq))
-
-; we need to read the event files direct on the first receiving, because in case it
-; gets delayed by core-async the event will lose the file references
-(defn listen-file-drop
-  ([el] (listen-file-drop el (chan)))
-  ([el out & {:keys [concat]
-              :or {concat true}}]
-    (let [handler (events/FileDropHandler. el true)]
-      (events/listen el js/goog.events.FileDropHandler.EventType.DROP
-        (fn [e] (let [files (event->files e)]
-                  (if concat
-                    (doseq [f files] (put! out f))
-                    (put! out files))))))
-    out))
 
 (defn map [f in]
   (let [out (chan)]
@@ -311,4 +245,17 @@
                          (recur state
                            (conj (pop cs) (timeout msecs))))
               threshold (recur ::init (pop cs)))))))
+    out))
+
+(defn once [f in]
+  (let [out (chan)]
+    (go
+      (let [val (<! in)]
+        (f val)
+        (>! out val))
+      (loop []
+        (if-let [val (<! in)]
+          (do (>! out val)
+              (recur))
+          (close! out))))
     out))
